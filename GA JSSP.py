@@ -2,6 +2,7 @@
 """
 Reference: https://github.com/wurmen/Genetic-Algorithm-for-Job-Shop-Scheduling-and-NSGA-II/
 """
+import random
 
 '''==========Solving job shop scheduling problem by gentic algorithm in python======='''
 # importing required modules
@@ -14,8 +15,8 @@ import matplotlib.pyplot as plt
 
 def run():
     re_entry = "JSP_dataset_re_entry.xlsx"
-    entry = "JSP_dataset.xlsx"
-    using = re_entry
+    parallel = "JSP_dataset_parallel.xlsx"
+    using = parallel
     ''' ================= initialization setting ======================'''
     pt_tmp = pd.read_excel(using, sheet_name="Processing Time", index_col=[0])
     ms_tmp = pd.read_excel(using, sheet_name="Machines Sequence", index_col=[0])
@@ -59,6 +60,11 @@ def run():
     mutation_selection_rate = float(input('Please input the mutation selection rate: ') or 0.2)
     num_mutation_jobs = round(num_gene * mutation_selection_rate)
     num_iteration = int(input('Please input number of iteration: ') or 2000)  # default value is 2000
+
+    shifting = input('Please input if shifting is available:') or 'False'
+    if shifting != 'False':
+        shifting_rate = float(input('Please input the shifting Mutation rate: ') or 0.8)
+        shifting_blocks = int(input('Please input shifting distance (0 to X): ') or 5)
 
     start_time = time.time()
 
@@ -170,6 +176,28 @@ def run():
                 # move the value of the first mutation position to the last mutation position
                 offspring_list[m][m_chg[num_mutation_jobs - 1]] = t_value_last
                 offspring_decimals[m][m_chg[num_mutation_jobs - 1]] = t_value_last_decimal
+
+        '''------------shifting mutration-----------------'''
+        if shifting != 'False':
+            total_values = []
+            for process in processing_time:
+                total_values.append(sum(process))
+            max_process = max(total_values)
+            idx_max_process = total_values.index(max_process)
+            for m in range(population_size):
+                probability = np.random.rand()
+                if probability > shifting_rate:
+                    for i in range(num_gene):
+                        if offspring_list[m][i] == idx_max_process:
+                            tmp_int = offspring_list[m][i]
+                            tmp_dec = offspring_decimals[m][i]
+                            new_idx = max(0, i - random.randint(3, shifting_blocks))
+                            offspring_list[m][i] = offspring_list[m][new_idx]
+                            offspring_decimals[m][i] = offspring_decimals[m][new_idx]
+                            offspring_list[m][new_idx] = tmp_int
+                            offspring_decimals[m][new_idx] = tmp_dec
+
+
 
         '''--------Concatenate decimals to integers--------------'''
         offspring_list = np.float_(offspring_list)
