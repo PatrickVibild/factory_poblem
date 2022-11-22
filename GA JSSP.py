@@ -226,7 +226,7 @@ def run():
                             mutation_prob = np.random.rand()
                             if mutation_prob < jhonson_mutation_rate:
                                 job_index = {}
-                                for job in range(num_jobs):
+                                for job in range(num_tasks):
                                     job_index[job] = [i for i, gen in enumerate(offspring_list[m]) if gen == job][i]
                                 candidates = random.sample(range(0, num_jobs-1), 2)
                                 # if job candidate[0] time is bigger, and appears first in gen
